@@ -10,8 +10,8 @@
 /// 2013, 2023
 
 // Student authors (fill in below):
-// NMec:  Name:
-// 
+// NMec:113278 Name: Jorge Guilherme Conceição Domingues
+// NMec:113893 Name: Guilherme Ferreira Santos
 // 
 // 
 // Date:
