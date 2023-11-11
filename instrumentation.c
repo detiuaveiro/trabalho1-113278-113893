@@ -6,7 +6,7 @@
 ///
 /// Use as follows:
 ///
-/// // Name the counters you're going to use: 
+/// // Name the counters you're going to use:
 /// InstrName[0] = "memops";
 /// InstrName[1] = "adds";
 /// InstrCalibrate();  // Call once, to measure CTU
@@ -24,7 +24,7 @@
 #include <stdlib.h>
 
 /// Cpu time in seconds
-double cpu_time(void) ; ///
+double cpu_time(void); ///
 
 #if defined(__linux__) || defined(__APPLE__)
 
@@ -34,16 +34,16 @@ double cpu_time(void) ; ///
 
 #include <time.h>
 
-double cpu_time(void) {
+double cpu_time(void)
+{
   struct timespec current_time;
 
-  if (clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &current_time) != 0)  // the first argument could also be CLOCK_REALTIME
-    return -1.0; // clock_gettime() failed!!!
+  if (clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &current_time) != 0) // the first argument could also be CLOCK_REALTIME
+    return -1.0;                                                   // clock_gettime() failed!!!
   return (double)current_time.tv_sec + 1.0e-9 * (double)current_time.tv_nsec;
 }
 
 #endif
-
 
 #if defined(_MSC_VER) || defined(_WIN32) || defined(_WIN64)
 
@@ -53,12 +53,14 @@ double cpu_time(void) {
 
 #include <windows.h>
 
-double cpu_time(void) {
+double cpu_time(void)
+{
   static LARGE_INTEGER frequency;
   static int first_time = 1;
   LARGE_INTEGER current_time;
 
-  if (first_time != 0) {
+  if (first_time != 0)
+  {
     QueryPerformanceFrequency(&frequency);
     first_time = 0;
   }
@@ -69,47 +71,51 @@ double cpu_time(void) {
 #endif
 
 /// Array of operation counters:
-unsigned long InstrCount[NUMCOUNTERS];  ///extern
+unsigned long InstrCount[NUMCOUNTERS]; /// extern
 
 /// Array of names for the counters:
-char* InstrName[NUMCOUNTERS] = {NULL};  ///extern
-    // All elements initialized to NULL
-    // See: https://en.cppreference.com/w/c/language/array_initialization
+char *InstrName[NUMCOUNTERS] = {NULL}; /// extern
+                                       // All elements initialized to NULL
+                                       // See: https://en.cppreference.com/w/c/language/array_initialization
 
 /// Cpu_time read on previous reset (~seconds)
-double InstrTime;  ///extern
+double InstrTime; /// extern
 
 /// Calibrated Time Unit (in seconds, initially 1s)
-double InstrCTU = 1.0;  ///extern
+double InstrCTU = 1.0; /// extern
 
 /// Find the Calibrated Time Unit (CTU).
 /// Run and time a loop of basic memory and arithmetic operations to set
 /// a reasonably cpu-independent time unit.
-void InstrCalibrate(void) { ///
-  const int size = 4*1024;     // 2^12!
+void InstrCalibrate(void)
+{                            ///
+  const int size = 4 * 1024; // 2^12!
   const int mask = size - 1;
-  int array[size];  // alloc array in stack, not initialized on purpose
+  int array[size]; // alloc array in stack, not initialized on purpose
   double time = cpu_time();
-  srand((unsigned int)(time*1e9));
-  for (int n = 0; n < 40000000; n++) {
+  srand((unsigned int)(time * 1e9));
+  for (int n = 0; n < 40000000; n++)
+  {
     int i = rand() & mask;
     int j = rand() & mask;
     int k = rand() & mask;
-    array[k] ^= array[i] + array[j] + i*j;
-    //printf("%d %d %d\n", i, j, k);  // debug
+    array[k] ^= array[i] + array[j] + i * j;
+    // printf("%d %d %d\n", i, j, k);  // debug
   }
   InstrCTU = cpu_time() - time;
 }
 
 /// Reset counters to zero and store cpu_time.
-void InstrReset(void) { ///
+void InstrReset(void)
+{ ///
   for (int i = 0; i < NUMCOUNTERS; i++)
     InstrCount[i] = 0ul;
   InstrTime = cpu_time();
 }
 
 // Print times and all named counter values
-void InstrPrint(void) { ///
+void InstrPrint(void)
+{ ///
   // elapsed time since last reset:
   double time = cpu_time() - InstrTime;
   // compute time in calibrated time units:
@@ -123,7 +129,6 @@ void InstrPrint(void) { ///
   printf("%15.6f\t%15.6f", time, caltime);
   for (int i = 0; i < NUMCOUNTERS; i++)
     if (InstrName[i] != NULL)
-      printf("\t%15lu", InstrCount[i]);  
+      printf("\t%15lu", InstrCount[i]);
   puts("");
 }
-

@@ -6,7 +6,7 @@
 ///
 /// Use as follows:
 ///
-/// // Name the counters you're going to use: 
+/// // Name the counters you're going to use:
 /// InstrName[0] = "memops";
 /// InstrName[1] = "adds";
 /// InstrCalibrate();  // Call once, to measure CTU
@@ -23,32 +23,31 @@
 #define INSTRUMENTATION_H
 
 /// Cpu time in seconds
-double cpu_time(void) ; ///
+double cpu_time(void); ///
 
 /// Ten counters should be more than enough
 #define NUMCOUNTERS 10
 
 /// Array of operation counters:
-extern unsigned long InstrCount[NUMCOUNTERS];  ///extern
+extern unsigned long InstrCount[NUMCOUNTERS]; /// extern
 
 /// Array of names for the counters:
-extern char* InstrName[NUMCOUNTERS];  ///extern
+extern char *InstrName[NUMCOUNTERS]; /// extern
 
 /// Cpu_time read on previous reset (~seconds)
-extern double InstrTime;  ///extern
+extern double InstrTime; /// extern
 
 /// Calibrated Time Unit (in seconds, initially 1s)
-extern double InstrCTU;  ///extern
+extern double InstrCTU; /// extern
 
 /// Find the Calibrated Time Unit (CTU).
 /// Run and time a loop of basic memory and arithmetic operations to set
 /// a reasonably cpu-independent time unit.
-void InstrCalibrate(void) ;
+void InstrCalibrate(void);
 
 /// Reset counters to zero and store cpu_time.
-void InstrReset(void) ;
+void InstrReset(void);
 
-void InstrPrint(void) ;
+void InstrPrint(void);
 
 #endif
-
