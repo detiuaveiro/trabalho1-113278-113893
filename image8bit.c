@@ -171,18 +171,18 @@ Image ImageCreate(int width, int height, uint8 maxval)
   assert(height >= 0);
   assert(0 < maxval && maxval <= PixMax);
   // Insert your code here!
-  Image img;
-  
-  img->width = width;
-  img->height = height;
-  img->maxval = maxval;
+  Image img = malloc(sizeof(struct image));
   if (img == NULL){
     errsave = errno;
     errno = errsave;
     return NULL;
   }
-  
+
+  img->width = width;
+  img->height = height;
+  img->maxval = maxval;
   img->pixel = malloc(width * height * sizeof(uint8));
+
   if (img->pixel == NULL){
     errsave = errno;
     errno = errsave;
@@ -202,6 +202,9 @@ void ImageDestroy(Image *imgp)
 { ///
   assert(imgp != NULL);
   // Insert your code here!
+  free((*imgp)->pixel);
+  free(*imgp);
+  *imgp = NULL;
 }
 
 /// PGM file operations
