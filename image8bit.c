@@ -171,6 +171,26 @@ Image ImageCreate(int width, int height, uint8 maxval)
   assert(height >= 0);
   assert(0 < maxval && maxval <= PixMax);
   // Insert your code here!
+  Image img;
+  
+  img->width = width;
+  img->height = height;
+  img->maxval = maxval;
+  if (img == NULL){
+    errsave = errno;
+    errno = errsave;
+    return NULL;
+  }
+  
+  img->pixel = malloc(width * height * sizeof(uint8));
+  if (img->pixel == NULL){
+    errsave = errno;
+    errno = errsave;
+    free(img);
+    return NULL;
+  }
+  return img;
+  
 }
 
 /// Destroy the image pointed to by (*imgp).
