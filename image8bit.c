@@ -326,6 +326,20 @@ void ImageStats(Image img, uint8 *min, uint8 *max)
 { ///
   assert(img != NULL);
   // Insert your code here!
+  uint8 pixel;
+  *min = *max = ImageGetPixel(img, 0, 0); // Initialize min and max with first pixel
+
+  for (int x = 1; x < img->width; x++)
+  {
+    for (int y = 0; y < img->height; y++)
+    {
+      pixel = ImageGetPixel(img, x, y);
+      if (pixel < *min)
+        *min = pixel;
+      if (pixel > *max)
+        *max = pixel;
+    }
+  }
 }
 
 /// Check if pixel position (x,y) is inside img.
@@ -340,6 +354,7 @@ int ImageValidRect(Image img, int x, int y, int w, int h)
 { ///
   assert(img != NULL);
   // Insert your code here!
+  return (0 <= x && x + w <= img->width) && (0 <= y && y + h <= img->height);
 }
 
 /// Pixel get & set operations
@@ -356,6 +371,7 @@ static inline int G(Image img, int x, int y)
 {
   int index;
   // Insert your code here!
+  index = x + y*img->width;
   assert(0 <= index && index < img->width * img->height);
   return index;
 }
@@ -392,6 +408,17 @@ void ImageNegative(Image img)
 { ///
   assert(img != NULL);
   // Insert your code here!
+  uint8 newLevel; //Initialize newLevel for the pixel
+
+  for (int x = 0; x < img->width; x++)
+  {
+    for (int y = 0; y < img->height; y++)
+    {
+      //ImageGetPixel(img, x, y) returns the current level of the pixel
+      newLevel = 255 - ImageGetPixel(img, x, y); //To transform to negative, we subtract the current level from 255 (Eg.Past=15 New=255-15=240; Past=240 New=255-240=15)
+      ImageSetPixel(img, x, y, newLevel);
+    }
+  }
 }
 
 /// Apply threshold to image.
@@ -401,6 +428,22 @@ void ImageThreshold(Image img, uint8 thr)
 { ///
   assert(img != NULL);
   // Insert your code here!
+  uint8 black = 0;
+  uint8 white = img->maxval;
+  uint8 pixelLevel;
+
+  for (int x = 0; x < img->width; x++)
+  {
+    for (int y = 0; y < img->height; y++)
+    {
+      pixelLevel = ImageGetPixel(img, x, y);
+
+      if (pixelLevel < thr)
+        ImageSetPixel(img, x, y, black);
+      else
+        ImageSetPixel(img, x, y, white);
+    }
+  }
 }
 
 /// Brighten image by a factor.
@@ -410,8 +453,25 @@ void ImageThreshold(Image img, uint8 thr)
 void ImageBrighten(Image img, double factor)
 { ///
   assert(img != NULL);
-  // ? assert (factor >= 0.0);
+  assert (factor >= 0.0);
   // Insert your code here!
+  uint8 currentLevel;
+  uint8 newLevel;
+
+  for (int x = 0; x < img->width; x++)
+  {
+    for (int y = 0; y < img->height; y++)
+    {
+      currentLevel = ImageGetPixel(img, x, y); //Get current level of the pixel
+      newLevel = currentLevel * factor;  //Multiply current level by factor
+
+      if (newLevel > img->maxval) //If new level is greater than maxval, set the new level to maxval
+        newLevel = img->maxval;
+
+      ImageSetPixel(img, x, y, newLevel);
+    }
+  }
+
 }
 
 /// Geometric transformations
@@ -439,6 +499,28 @@ Image ImageRotate(Image img)
 { ///
   assert(img != NULL);
   // Insert your code here!
+  Image rotatedImg = ImageCreate(img->height, img->width, img->maxval); //Create a new image with swapped dimensions because of the rotated context
+  if (rotatedImg == NULL){
+    errsave = errno;
+    errno = errsave;
+    return NULL;
+  }
+
+  int rotatedX, rotatedY;
+  int maxY = img->width-1 ; //Max Y coordinate
+
+  //Rotate Loop
+  for (int y = 0; y < img->height; y++)
+  {
+    for (int x = 0; x < img->width; x++)
+    {
+      rotatedX = y; //The new X coordinate is the current Y coordinate
+      rotatedY = maxY - x; 
+      //ImageGetPixel(img, x, y) returns the level of the pixel in the original position
+      ImageSetPixel(rotatedImg, rotatedX, rotatedY, ImageGetPixel(img, x, y)); //Set the level of the original pixel to the rotated position
+    }
+  }
+  return rotatedImg;
 }
 
 /// Mirror an image = flip left-right.
@@ -452,6 +534,26 @@ Image ImageMirror(Image img)
 { ///
   assert(img != NULL);
   // Insert your code here!
+  Image mirroredImg = ImageCreate(img->width, img->height, img->maxval);
+  if (mirroredImg == NULL){
+    errsave = errno;
+    errno = errsave;
+    return NULL;
+  }
+
+  int maxX = img->width-1; //Max X coordinate
+
+  //Mirror Loop
+  for (int x = 0; x < img->width; x++)
+  {
+    for (int y = 0; y < img->height; y++)
+    {
+      //ImageGetPixel(img, maxX - x, y) returns the level of the pixel in the mirrored position
+      ImageSetPixel(mirroredImg, x, y, ImageGetPixel(img, maxX-x, y)); //Set the level of the mirrored pixel to the new image
+    }
+  }
+  return mirroredImg;
+
 }
 
 /// Crop a rectangular subimage from img.
