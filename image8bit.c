@@ -573,6 +573,24 @@ Image ImageCrop(Image img, int x, int y, int w, int h)
   assert(img != NULL);
   assert(ImageValidRect(img, x, y, w, h));
   // Insert your code here!
+  Image croppedImg = ImageCreate(w, h, img->maxval);
+  if (croppedImg == NULL){
+    errsave = errno;
+    errno = errsave;
+    return NULL;
+  }
+
+  //Crop Loop
+  for (int i = 0; i < w; i++)
+  {
+    for (int j = 0; j < h; j++)
+    {
+      //If the begining of the subimage is at (x,y), then the pixel at (i,j) needs to be the pixel at (x+i,y+j) in the original image
+      //ImageGetPixel(img, x + i, y + j) returns the level of the pixel in the original image
+      ImageSetPixel(croppedImg, i, j, ImageGetPixel(img, x + i, y + j)); //Set the level of the cropped pixel to the new image
+    }
+  }
+  return croppedImg;
 }
 
 /// Operations on two images
@@ -587,6 +605,15 @@ void ImagePaste(Image img1, int x, int y, Image img2)
   assert(img2 != NULL);
   assert(ImageValidRect(img1, x, y, img2->width, img2->height));
   // Insert your code here!
+  //This for loop goes through the subimage and sets the pixels of the image1 to the pixels of the subimage at position (i,j)
+  for (int i = 0; i < img2->width; i++)
+  {
+    for (int j = 0; j < img2->height; j++)
+    {
+      //Because the subimage needs to be at position (x,y), its pixels need to be at position (x+i,y+j) in the image1
+      ImageSetPixel(img1, x + i, y + j, ImageGetPixel(img2, i, j));
+    }
+  }
 }
 
 /// Blend an image into a larger image.
@@ -601,6 +628,19 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha)
   assert(img2 != NULL);
   assert(ImageValidRect(img1, x, y, img2->width, img2->height));
   // Insert your code here!
+  uint8 img2newLevel;
+
+  //Basically the same as ImagePaste, however, now the pixels level of the subimage are multiplied by alpha
+  for (int i = 0; i < img2->width; i++)
+  {
+    for (int j = 0; j < img2->height; j++)
+    {
+      img2newLevel = (uint8)(ImageGetPixel(img2, i, j) * alpha); 
+      if (img2newLevel < 0) img2newLevel = 0; //If the new level is less than 0, saturate it to 0
+      if (img2newLevel > img1->maxval) img2newLevel = img1->maxval; //If the new level is greater than maxval, saturate it to maxval
+      ImageSetPixel(img1, x + i, y + j, img2newLevel);
+    }
+  }
 }
 
 /// Compare an image to a subimage of a larger image.
