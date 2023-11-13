@@ -456,19 +456,19 @@ void ImageBrighten(Image img, double factor)
   assert (factor >= 0.0);
   // Insert your code here!
   uint8 currentLevel;
-  uint8 newLevel;
+  double newLevel;
 
   for (int x = 0; x < img->width; x++)
   {
     for (int y = 0; y < img->height; y++)
     {
       currentLevel = ImageGetPixel(img, x, y); //Get current level of the pixel
-      newLevel = currentLevel * factor;  //Multiply current level by factor
+      newLevel = currentLevel * factor + 0.5;  //Multiply current level by factor  (+0.5 so it rounds up)
 
       if (newLevel > img->maxval) //If new level is greater than maxval, set the new level to maxval
         newLevel = img->maxval;
 
-      ImageSetPixel(img, x, y, newLevel);
+      ImageSetPixel(img, x, y, (uint8)newLevel);
     }
   }
 
@@ -628,17 +628,24 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha)
   assert(img2 != NULL);
   assert(ImageValidRect(img1, x, y, img2->width, img2->height));
   // Insert your code here!
-  uint8 img2newLevel;
+  double img2newLevel;
 
   //Basically the same as ImagePaste, however, now the pixels level of the subimage are multiplied by alpha
   for (int i = 0; i < img2->width; i++)
   {
     for (int j = 0; j < img2->height; j++)
     {
-      img2newLevel = (uint8)(ImageGetPixel(img2, i, j) * alpha); 
+      //ImageGetPixel(img1, x+i, y+j) returns the level of the pixel in the original image
+      //ImageGetPixel(img2, i, j) returns the level of the pixel in the subimage
+      //To blend the images, we need to achieve the intermediate level between the two images
+      //Alpha is the value that determines the weight of the subimage
+      //1 - alpha is the value that determines the weight of the original image
+      //In that way, if alpha is 0, the original image stays the same
+      //If alpha is 1, the subimage stays pure in the original image
+      img2newLevel =  (1.0 - alpha)*ImageGetPixel(img1, x+i, y+j) + ImageGetPixel(img2, i, j) * alpha + 0.5; 
       if (img2newLevel < 0) img2newLevel = 0; //If the new level is less than 0, saturate it to 0
       if (img2newLevel > img1->maxval) img2newLevel = img1->maxval; //If the new level is greater than maxval, saturate it to maxval
-      ImageSetPixel(img1, x + i, y + j, img2newLevel);
+      ImageSetPixel(img1, x + i, y + j, (uint8)img2newLevel);
     }
   }
 }
