@@ -686,14 +686,14 @@ int ImageLocateSubImage(Image img1, int *px, int *py, Image img2)
   assert(img1 != NULL);
   assert(img2 != NULL);
   // Insert your code here!
-  for (int i = 0; i < img2->width; i++)
-  {
-    for (int j = 0; j < img2->height; j++)
-    {
-      if (ImageMatchSubImage(img1, i, j, img2))
+  for (int x = 0; x < img1->width - img2->width; x++)  // img1->width - img2->width because we can't check a position where img1->width - x is less than img2->width
+  {                                                    // Doing that would cause an error in ImageMatchSubImage
+    for (int y = 0; y < img1->height - img2->height; y++)  // Same logic for y: img1->height - img2->height because we can't check a position where img1->height - y is less than img2->height
+    {                                                      // Doing that would cause the same error in ImageMatchSubImage
+      if (ImageMatchSubImage(img1, x, y, img2))
       {
-        *px = i;
-        *py = j;
+        *px = x;
+        *py = y;
         return 1;
       }
     }
@@ -710,4 +710,52 @@ int ImageLocateSubImage(Image img1, int *px, int *py, Image img2)
 void ImageBlur(Image img, int dx, int dy)
 { ///
   // Insert your code here!
+  assert(img != NULL);
+  assert(dx >= 0);
+  assert(dy >= 0);
+
+  Image blurredImg = ImageCreate(img->width, img->height, img->maxval);
+  if (blurredImg == NULL)
+  {
+    errsave = errno;
+    errno = errsave;
+    return;
+  }
+  double sum, mean;
+  int count, x, y, i, j;
+
+  // 1º way - O(width*height*(2dx+1)*(2dy+1)) time complexity
+  for (x = 0; x < img->width; x++)
+  {
+    for (y = 0; y < img->height; y++)
+    {
+      sum = 0;
+      count = 0;
+
+      for (i = -dx; i <= dx; i++)
+      {
+        for (j = -dy; j <= dy; j++)
+        {
+          if (ImageValidPos(img, x+i, y+j))
+          {
+            sum += ImageGetPixel(img, x+i, y+j) + 0.5;
+            count++;
+          }
+        }
+      }
+
+      mean = sum / count;
+      ImageSetPixel(blurredImg, x, y, (uint8)mean);
+    }
+
+  }
+
+  // Copy the blurred image back to the original image
+  free(img->pixel); // Free the original image pixel array
+  img->pixel = blurredImg->pixel;  // Point the original image pixel array to the blurred image pixel array
+
+  // free the temporary blurred image, not necessary to free the pixel array because it is already atributed to the original image
+  free(blurredImg);
+
 }
+
