@@ -7,7 +7,7 @@
 
 CFLAGS = -Wall -O2 -g
 
-PROGS = imageTool imageTest LocateImageBestCase 
+PROGS = imageTool imageTest LocateImageTest
 
 TESTS = test1 test2 test3 test4 test5 test6 test7 test8 test9
 
@@ -22,9 +22,9 @@ imageTool: imageTool.o image8bit.o instrumentation.o error.o
 
 imageTool.o: image8bit.h instrumentation.h
 
-LocateImageBestCase: LocateImageBestCase.o image8bit.o instrumentation.o error.o
+LocateImageTest: LocateImageTest.o image8bit.o instrumentation.o error.o
 
-LocateImageBestCase.o: image8bit.h instrumentation.h
+LocateImageTest.o: image8bit.h instrumentation.h
 
 # Rule to make any .o file dependent upon corresponding .h file
 %.o: %.h
@@ -77,8 +77,8 @@ test9: $(PROGS) setup
 	./imageTool test/original.pgm blur 7,7 save blur.pgm
 	cmp blur.pgm test/blur.pgm
 
-testLocateImageBestCase: $(PROGS) setup
-	./LocateImageBestCase pgm/small/bird_256x256.pgm pgm/medium/ireland-03_640x480.pgm pgm/large/airfield-05_1600x1200.pgm pgm/small/art3_222x217.pgm
+testLocateImage: $(PROGS) setup
+	./LocateImageTest pgm/small/bird_256x256.pgm pgm/medium/ireland-03_640x480.pgm pgm/large/airfield-05_1600x1200.pgm pgm/small/art3_222x217.pgm
 
 valgrindTests: $(PROGS) setup
 	valgrind ./imageTool test/original.pgm neg save neg.pgm
