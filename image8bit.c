@@ -458,21 +458,33 @@ void ImageBrighten(Image img, double factor)
   assert(img != NULL);
   assert(factor >= 0.0);
   // Insert your code here!
-  uint8 currentLevel;
+  // uint8 currentLevel;
   double newLevel;
 
-  for (int x = 0; x < img->width; x++)
+  // for (int x = 0; x < img->width; x++)
+  // {
+  //   for (int y = 0; y < img->height; y++)
+  //   {
+  //     currentLevel = ImageGetPixel(img, x, y); // Get current level of the pixel
+  //     newLevel = currentLevel * factor + 0.5;  // Multiply current level by factor  (+0.5 so it rounds up)
+
+  //     if (newLevel > img->maxval) // If new level is greater than maxval, set the new level to maxval
+  //       newLevel = img->maxval;
+
+  //     ImageSetPixel(img, x, y, (uint8)newLevel);
+  //   }
+  // }
+
+  for (size_t i = 0; i < img->width * img->height; i++)
   {
-    for (int y = 0; y < img->height; y++)
+    newLevel = img->pixel[i] * factor + 0.5;
+
+    if (newLevel > img->maxval)
     {
-      currentLevel = ImageGetPixel(img, x, y); // Get current level of the pixel
-      newLevel = currentLevel * factor + 0.5;  // Multiply current level by factor  (+0.5 so it rounds up)
-
-      if (newLevel > img->maxval) // If new level is greater than maxval, set the new level to maxval
-        newLevel = img->maxval;
-
-      ImageSetPixel(img, x, y, (uint8)newLevel);
+      newLevel = img->maxval;
     }
+
+    img->pixel[i] = (uint8)newLevel;
   }
 }
 
@@ -689,9 +701,9 @@ int ImageLocateSubImage(Image img1, int *px, int *py, Image img2)
   assert(img1 != NULL);
   assert(img2 != NULL);
   // Insert your code here!
-  for (int x = 0; x <= img1->width - img2->width; x++)  // img1->width - img2->width because we can't check a position where img1->width - x is less than img2->width
-  {                                                    // Doing that would cause an error in ImageMatchSubImage
-    for (int y = 0; y <= img1->height - img2->height; y++)  // Same logic for y: img1->height - img2->height because we can't check a position where img1->height - y is less than img2->height
+  for (int x = 0; x <= img1->width - img2->width; x++)     // img1->width - img2->width because we can't check a position where img1->width - x is less than img2->width
+  {                                                        // Doing that would cause an error in ImageMatchSubImage
+    for (int y = 0; y <= img1->height - img2->height; y++) // Same logic for y: img1->height - img2->height because we can't check a position where img1->height - y is less than img2->height
     {                                                      // Doing that would cause the same error in ImageMatchSubImage
       if (ImageMatchSubImage(img1, x, y, img2))
       {
@@ -739,9 +751,9 @@ void ImageBlur(Image img, int dx, int dy)
       {
         for (j = -dy; j <= dy; j++)
         {
-          if (ImageValidPos(img, x+i, y+j))
+          if (ImageValidPos(img, x + i, y + j))
           {
-            sum += ImageGetPixel(img, x+i, y+j) + 0.5;
+            sum += ImageGetPixel(img, x + i, y + j) + 0.5;
             count++;
           }
         }
@@ -750,15 +762,12 @@ void ImageBlur(Image img, int dx, int dy)
       mean = sum / count;
       ImageSetPixel(blurredImg, x, y, (uint8)mean);
     }
-
   }
 
   // Copy the blurred image back to the original image
-  free(img->pixel); // Free the original image pixel array
-  img->pixel = blurredImg->pixel;  // Point the original image pixel array to the blurred image pixel array
+  free(img->pixel);               // Free the original image pixel array
+  img->pixel = blurredImg->pixel; // Point the original image pixel array to the blurred image pixel array
 
   // free the temporary blurred image, not necessary to free the pixel array because it is already atributed to the original image
   free(blurredImg);
-
 }
-
