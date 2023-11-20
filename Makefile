@@ -7,7 +7,7 @@
 
 CFLAGS = -Wall -O2 -g
 
-PROGS = imageTool imageTest
+PROGS = imageTool imageTest LocateImageBestCase
 
 TESTS = test1 test2 test3 test4 test5 test6 test7 test8 test9
 
@@ -21,6 +21,10 @@ imageTest.o: image8bit.h instrumentation.h
 imageTool: imageTool.o image8bit.o instrumentation.o error.o
 
 imageTool.o: image8bit.h instrumentation.h
+
+LocateImageBestCase: LocateImageBestCase.o image8bit.o instrumentation.o error.o
+
+LocateImageBestCase.o: image8bit.h instrumentation.h
 
 # Rule to make any .o file dependent upon corresponding .h file
 %.o: %.h

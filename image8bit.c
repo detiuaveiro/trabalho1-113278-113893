@@ -146,11 +146,13 @@ void ImageInit(void)
 { ///
   InstrCalibrate();
   InstrName[0] = "pixmem"; // InstrCount[0] will count pixel array acesses
+  InstrName[1] = "comparasions";
   // Name other counters here...
 }
 
 // Macros to simplify accessing instrumentation counters:
 #define PIXMEM InstrCount[0]
+#define COMPARASIONS InstrCount[1]
 // Add more macros here...
 
 // TIP: Search for PIXMEM or InstrCount to see where it is incremented!
@@ -670,6 +672,7 @@ int ImageMatchSubImage(Image img1, int x, int y, Image img2)
     {
       if (ImageGetPixel(img1, x + i, y + j) != (ImageGetPixel(img2, i, j)))
       {
+        COMPARASIONS++;
         return 0;
       }
     }
