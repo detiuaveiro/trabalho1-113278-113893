@@ -670,9 +670,9 @@ int ImageMatchSubImage(Image img1, int x, int y, Image img2)
   {
     for (int j = 0; j < img2->height; j++)
     {
+      COMPARASIONS++;
       if (ImageGetPixel(img1, x + i, y + j) != (ImageGetPixel(img2, i, j)))
       {
-        COMPARASIONS++;
         return 0;
       }
     }
