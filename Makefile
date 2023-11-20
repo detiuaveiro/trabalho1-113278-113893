@@ -77,6 +77,9 @@ test9: $(PROGS) setup
 	./imageTool test/original.pgm blur 7,7 save blur.pgm
 	cmp blur.pgm test/blur.pgm
 
+testLocateImageBestCase: $(PROGS) setup
+	./LocateImageBestCase 
+
 .PHONY: tests
 tests: $(TESTS)
 
