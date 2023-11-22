@@ -137,9 +137,9 @@ void LocateImageMediumCase(int argc, char *argv[])
         exit(1);
     }
 
-    ImagePaste(big, ImageWidth(big) - ImageWidth(smaller), ImageHeight(big) - ImageHeight(smaller), smaller);
-    ImagePaste(medium, ImageWidth(medium) - ImageWidth(smaller), ImageHeight(medium) - ImageHeight(smaller), smaller);
-    ImagePaste(small, ImageWidth(small) - ImageWidth(smaller), ImageHeight(small) - ImageHeight(smaller), smaller);
+    ImagePaste(big, (ImageWidth(big) - ImageWidth(smaller)) / 2, (ImageHeight(big) - ImageHeight(smaller)) / 2, smaller);
+    ImagePaste(medium, (ImageWidth(medium) - ImageWidth(smaller)) / 2, (ImageHeight(medium) - ImageHeight(smaller)) / 2, smaller);
+    ImagePaste(small, (ImageWidth(small) - ImageWidth(smaller)) / 2, (ImageHeight(small) - ImageHeight(smaller)) / 2, smaller);
 
     int px, py;
 
