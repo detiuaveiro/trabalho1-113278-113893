@@ -344,7 +344,7 @@ void ImageStats(Image img, uint8 *min, uint8 *max)
   //   }
   // }
 
-  for (size_t i = 0; i < ImageWidth(img) * ImageHeight(img); i++)
+  for (size_t i = 0; i < img->width * img->height; i++)
   {
     pixel = img->pixel[i];
     if (pixel < *min)
@@ -388,12 +388,8 @@ static inline int G(Image img, int x, int y)
   int index;
   // Insert your code here!
 
-  // index = x + y * img->width;
-
-  index = x + y * ImageWidth(img);
-
-  // assert(0 <= index && index < img->width * img->height);
-  assert(0 <= index && index < ImageWidth(img) * ImageHeight(img));
+  index = x + y * img->width;
+  assert(0 <= index && index < img->width * img->height);
 
   return index;
 }
@@ -442,7 +438,7 @@ void ImageNegative(Image img)
   //   }
   // }
 
-  for (size_t i = 0; i < ImageWidth(img) * ImageHeight(img); i++)
+  for (size_t i = 0; i < img->width * img->height; i++)
   {
     img->pixel[i] = 255 - img->pixel[i];
   }
@@ -456,8 +452,7 @@ void ImageThreshold(Image img, uint8 thr)
   assert(img != NULL);
   // Insert your code here!
   uint8 black = 0;
-  // uint8 white = img->maxval;
-  uint8 white = ImageMaxval(img);
+  uint8 white = img->maxval;
   // uint8 pixelLevel;
 
   // for (int x = 0; x < img->width; x++)
@@ -473,7 +468,7 @@ void ImageThreshold(Image img, uint8 thr)
   //   }
   // }
 
-  for (size_t i = 0; i < ImageWidth(img) * ImageHeight(img); i++)
+  for (size_t i = 0; i < img->width * img->height; i++)
   {
     if (img->pixel[i] < thr)
     {
@@ -512,13 +507,13 @@ void ImageBrighten(Image img, double factor)
   //   }
   // }
 
-  for (size_t i = 0; i < ImageWidth(img) * ImageHeight(img); i++)
+  for (size_t i = 0; i < img->width * img->height; i++)
   {
     newLevel = img->pixel[i] * factor + 0.5;
 
-    if (newLevel > ImageMaxval(img))
+    if (newLevel > img->maxval)
     {
-      newLevel = ImageMaxval(img);
+      newLevel = img->maxval;
     }
 
     img->pixel[i] = (uint8)newLevel;
@@ -551,7 +546,7 @@ Image ImageRotate(Image img)
   assert(img != NULL);
   // Insert your code here!
   // Image rotatedImg = ImageCreate(img->height, img->width, img->maxval); // Create a new image with swapped dimensions because of the rotated context
-  Image rotatedImg = ImageCreate(ImageHeight(img), ImageWidth(img), ImageMaxval(img)); // Create a new image with swapped dimensions because of the rotated context
+  Image rotatedImg = ImageCreate(img->height, img->width, img->maxval); // Create a new image with swapped dimensions because of the rotated context
 
   if (rotatedImg == NULL)
   {
@@ -563,7 +558,7 @@ Image ImageRotate(Image img)
   int rotatedX, rotatedY;
   // int maxY = img->width - 1; // Max Y coordinate
 
-  int maxY = ImageWidth(img) - 1; // Max Y coordinate
+  int maxY = img->width - 1; // Max Y coordinate
 
   // Rotate Loop
   // for (int y = 0; y < img->height; y++)
@@ -577,9 +572,9 @@ Image ImageRotate(Image img)
   //   }
   // }
 
-  for (int y = 0; y < ImageHeight(img); y++)
+  for (int y = 0; y < img->height; y++)
   {
-    for (int x = 0; x < ImageWidth(img); x++)
+    for (int x = 0; x < img->width; x++)
     {
       rotatedX = y; // The new X coordinate is the current Y coordinate
       rotatedY = maxY - x;
