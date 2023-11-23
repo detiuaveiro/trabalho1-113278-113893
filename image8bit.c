@@ -717,7 +717,56 @@ int ImageLocateSubImage(Image img1, int *px, int *py, Image img2)
 }
 
 /// Filtering
+static unsigned long** calculeCumulativeSums(Image img)
+{
+  //Allocate the cumulativeSums matrix (width x height) but first allocate the width
+  unsigned long **cumulativeSums = (unsigned long**)malloc(img->width * sizeof(unsigned long *));
+  if (cumulativeSums == NULL)
+  {
+    errsave = errno;
+    errno = errsave;
+    return NULL;
+  }
 
+  int x, y;
+  //Allocate the height of the cumulativeSums matrix for each width index
+  for (x = 0; x < img->width; x++)
+  {
+    cumulativeSums[x] = (unsigned long*)malloc(img->height * sizeof(unsigned long));
+    if (cumulativeSums[x] == NULL)
+    {
+      errsave = errno;
+      errno = errsave;
+      for (int j = 0; j <= x; j++){
+        free(cumulativeSums[j]);
+      }
+      free(cumulativeSums);
+      return NULL;
+    }
+  }
+  //Initialize the first value of the cumulativeSums matrix (0,0)
+  cumulativeSums[0][0] = ImageGetPixel(img, 0, 0);
+
+  //Initialize the first column of the cumulativeSums matrix
+  for (x = 1; x < img->width; x++){
+    cumulativeSums[x][0] = ImageGetPixel(img, x, 0) + cumulativeSums[x-1][0];
+  }
+
+  //Initialize the first row of the cumulativeSums matrix
+  for (y = 1; y < img->height; y++){
+    cumulativeSums[0][y] = ImageGetPixel(img, 0, y) + cumulativeSums[0][y-1];
+  }
+
+  //Calculate the rest of the cumulativeSums matrix
+  for (x = 1; x < img->width; x++)
+  {
+    for (y = 1; y < img->height; y++)
+    {
+      cumulativeSums[x][y] = ImageGetPixel(img, x, y) + cumulativeSums[x - 1][y] + cumulativeSums[x][y - 1] - cumulativeSums[x - 1][y - 1];
+    }
+  }
+  return cumulativeSums;
+}
 /// Blur an image by a applying a (2dx+1)x(2dy+1) mean filter.
 /// Each pixel is substituted by the mean of the pixels in the rectangle
 /// [x-dx, x+dx]x[y-dy, y+dy].
@@ -729,45 +778,96 @@ void ImageBlur(Image img, int dx, int dy)
   assert(dx >= 0);
   assert(dy >= 0);
 
-  Image blurredImg = ImageCreate(img->width, img->height, img->maxval);
-  if (blurredImg == NULL)
-  {
-    errsave = errno;
-    errno = errsave;
-    return;
-  }
-  double sum, mean;
-  int count, x, y, i, j;
+  //1º way - O(width*height*(2dx+1)*(2dy+1)) time complexity
+  // Image blurredImg = ImageCreate(img->width, img->height, img->maxval);
+  // if (blurredImg == NULL)
+  // {
+  //   errsave = errno;
+  //   errno = errsave;
+  //   return;
+  // }
 
-  // 1º way - O(width*height*(2dx+1)*(2dy+1)) time complexity
+  // double sum, mean;
+  // int count, x, y, i, j;
+
+  // for (x = 0; x < img->width; x++)
+  // {
+  //   for (y = 0; y < img->height; y++)
+  //   {
+  //     //For every pixel we calculate its mean
+  //     sum = 0;
+  //     count = 0;
+
+  //     for (i = -dx; i <= dx; i++)
+  //     {
+  //       for (j = -dy; j <= dy; j++)
+  //       {
+  //         COMPARASIONS++;
+  //         if (ImageValidPos(img, x + i, y + j))
+  //         {
+  //           sum += ImageGetPixel(img, x + i, y + j) + 0.5;
+  //           count++;
+  //         }
+  //       }
+  //     }
+
+  //     mean = sum / count;
+  //     ImageSetPixel(blurredImg, x, y, (uint8)mean);
+  //   }
+  // }
+  // //Copy the blurred image back to the original image
+  // free(img->pixel);               // Free the original image pixel array
+  // img->pixel = blurredImg->pixel; // Point the original image pixel array to the blurred image pixel array
+
+  // // free the temporary blurred image, not necessary to free the pixel array because it is already atributed to the original image
+  // free(blurredImg);
+
+  // 2º way - O(width*height) time complexity
+  //Aproach Idea: 1 - Calculate the array of the cumulative sums of the pixels
+  //              2 - Using this array, now we can calculate the mean of the pixels in the rectangle [x-dx, x+dx]x[y-dy, y+dy] in O(1) time complexity
+  //              3 - Because calculating the mean of the pixels is O(1) time complexity, for all the pixels of the image it is only O(width*height) time complexity
+  
+  //Calculate the array of the cumulative sums of the pixels
+  unsigned long **cumulativeSums = calculeCumulativeSums(img);
+
+  //Calculate the mean of the pixels in the rectangle [x-dx, x+dx]x[y-dy, y+dy]
+  double sum, mean;
+  int window, x, y, x1, x2, y1, y2;
+
   for (x = 0; x < img->width; x++)
   {
     for (y = 0; y < img->height; y++)
     {
-      sum = 0;
-      count = 0;
+      //Calculate the rectangle coordinates
+      x1 = x - dx; // x1 is the left side of the rectangle
+      x2 = x + dx; // x2 is the right side of the rectangle
+      y1 = y - dy; // y1 is the top side of the rectangle
+      y2 = y + dy; // y2 is the bottom side of the rectangle
 
-      for (i = -dx; i <= dx; i++)
-      {
-        for (j = -dy; j <= dy; j++)
-        {
-          if (ImageValidPos(img, x + i, y + j))
-          {
-            sum += ImageGetPixel(img, x + i, y + j) + 0.5;
-            count++;
-          }
-        }
-      }
+      //Check if the rectangle is inside the image, if not set the rectangle to the image limits
+      if (x1 < 0) x1 = 0;
+      if (x2 >= img->width) x2 = img->width - 1;
+      if (y1 < 0) y1 = 0;
+      if (y2 >= img->height) y2 = img->height - 1;
 
-      mean = sum / count;
-      ImageSetPixel(blurredImg, x, y, (uint8)mean);
+      //Calculate the sum of the pixels in the rectangle
+      sum = cumulativeSums[x2][y2];
+      if (x1 > 0) sum -= cumulativeSums[x1 - 1][y2];
+      if (y1 > 0) sum -= cumulativeSums[x2][y1 - 1];
+      if (x1 > 0 && y1 > 0) sum += cumulativeSums[x1 - 1][y1 - 1];
+
+      //Calculate the mean of the pixels in the rectangle
+      window = (x2 - x1 + 1) * (y2 - y1 + 1);
+      mean = sum/window + 0.5;  // +0.5 so it rounds up
+
+      //Set the pixel to the mean
+      ImageSetPixel(img, x, y, (uint8)mean);
     }
   }
+  //Deallocate the cumulativeSums matrix
+  for (x = 0; x < img->width; x++){
+    free(cumulativeSums[x]);
+  }
+  free(cumulativeSums);
 
-  // Copy the blurred image back to the original image
-  free(img->pixel);               // Free the original image pixel array
-  img->pixel = blurredImg->pixel; // Point the original image pixel array to the blurred image pixel array
-
-  // free the temporary blurred image, not necessary to free the pixel array because it is already atributed to the original image
-  free(blurredImg);
 }

@@ -7,7 +7,7 @@
 
 CFLAGS = -Wall -O2 -g
 
-PROGS = imageTool imageTest LocateImageTest
+PROGS = imageTool imageTest LocateImageTest BlurTest
 
 TESTS = test1 test2 test3 test4 test5 test6 test7 test8 test9
 
@@ -25,6 +25,10 @@ imageTool.o: image8bit.h instrumentation.h
 LocateImageTest: LocateImageTest.o image8bit.o instrumentation.o error.o
 
 LocateImageTest.o: image8bit.h instrumentation.h
+
+BlurTest: BlurTest.o image8bit.o instrumentation.o error.o
+
+BlurTest.o: image8bit.h instrumentation.h
 
 # Rule to make any .o file dependent upon corresponding .h file
 %.o: %.h
@@ -91,6 +95,8 @@ valgrindTests: $(PROGS) setup
 	valgrind ./imageTool test/small.pgm test/original.pgm blend 100,100,.33 save blend.pgm
 	valgrind ./imageTool test/original.pgm blur 7,7 save blur.pgm
 
+testBlur: $(PROGS) setup
+	./BlurTest pgm/small/bird_256x256.pgm pgm/medium/ireland-03_640x480.pgm pgm/large/airfield-05_1600x1200.pgm 
 
 .PHONY: tests
 tests: $(TESTS)

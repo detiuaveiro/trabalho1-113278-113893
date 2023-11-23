@@ -163,6 +163,5 @@ void LocateImageWorstCase(int argc, char* argv[]){
 int main(int argc, char* argv[]){
     LocateImageBestCase(argc, argv); 
     LocateImageWorstCase(argc, argv);   
-
     return 0;
 }
