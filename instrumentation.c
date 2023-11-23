@@ -130,5 +130,5 @@ void InstrPrint(void)
   for (int i = 0; i < NUMCOUNTERS; i++)
     if (InstrName[i] != NULL)
       printf("\t%15lu", InstrCount[i]);
-  puts("");
+  puts("");//Test the blur in the small image in window (1,1)
 }

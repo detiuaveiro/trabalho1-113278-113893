@@ -36,10 +36,10 @@ void BlurTestBestCase(int argc, char* argv[]){
     int dx = 0;
     int dy = 0;
 
-    //Test the blur in the big image in window (1,1)
+    //Test the blur in the small image in window (1,1)
     InstrReset();
-    printf("Blur Big image: \n");
-    ImageBlur(big, dx, dy);
+    printf("Blur Small image: \n");
+    ImageBlur(small, dx, dy);
     InstrPrint();
 
     //Test the blur in the medium image in window (1,1)
@@ -48,12 +48,12 @@ void BlurTestBestCase(int argc, char* argv[]){
     ImageBlur(medium, dx, dy);
     InstrPrint();
 
-    //Test the blur in the small image in window (1,1)
+    //Test the blur in the big image in window (1,1)
     InstrReset();
-    printf("Blur Small image: \n");
-    ImageBlur(small, dx, dy);
+    printf("Blur Big image: \n");
+    ImageBlur(big, dx, dy);
     InstrPrint();
-
+    
     printf("-----------------------------------------------------\n");
 
     ImageDestroy(&small);

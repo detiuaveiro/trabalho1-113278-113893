@@ -146,13 +146,13 @@ void ImageInit(void)
 { ///
   InstrCalibrate();
   InstrName[0] = "pixmem"; // InstrCount[0] will count pixel array acesses
-  InstrName[1] = "comparasions";
+  InstrName[1] = "iterations";
   // Name other counters here...
 }
 
 // Macros to simplify accessing instrumentation counters:
 #define PIXMEM InstrCount[0]
-#define COMPARASIONS InstrCount[1]
+#define ITERATIONS InstrCount[1]
 // Add more macros here...
 
 // TIP: Search for PIXMEM or InstrCount to see where it is incremented!
@@ -665,7 +665,7 @@ int ImageMatchSubImage(Image img1, int x, int y, Image img2)
   {
     for (int j = 0; j < img2->height; j++)
     {
-      COMPARASIONS++;
+      ITERATIONS++;
       if (ImageGetPixel(img1, x + i, y + j) != (ImageGetPixel(img2, i, j)))
       {
         return 0;
@@ -715,7 +715,8 @@ static unsigned long **calculeCumulativeSums(Image img)
   // Allocate the height of the cumulativeSums matrix for each width index
   for (x = 0; x < img->width; x++)
   {
-    cumulativeSums[x] = (unsigned long *)malloc(img->height * sizeof(unsigned long));
+    ITERATIONS++;
+    cumulativeSums[x] = (unsigned long*)malloc(img->height * sizeof(unsigned long));
     if (cumulativeSums[x] == NULL)
     {
       errsave = errno;
@@ -728,19 +729,18 @@ static unsigned long **calculeCumulativeSums(Image img)
       return NULL;
     }
   }
-  // Initialize the first value of the cumulativeSums matrix (0,0)
-  cumulativeSums[0][0] = ImageGetPixel(img, 0, 0);
 
-  // Initialize the first column of the cumulativeSums matrix
-  for (x = 1; x < img->width; x++)
-  {
-    cumulativeSums[x][0] = ImageGetPixel(img, x, 0) + cumulativeSums[x - 1][0];
+  //Initialize the first column of the cumulativeSums matrix
+  for (x = 0; x < img->width; x++){
+    ITERATIONS++;
+    if (x == 0) cumulativeSums[x][0] = ImageGetPixel(img, 0, 0); //If it is the first pixel, the sum is the pixel itself
+    else cumulativeSums[x][0] = ImageGetPixel(img, x, 0) + cumulativeSums[x-1][0];
   }
 
-  // Initialize the first row of the cumulativeSums matrix
-  for (y = 1; y < img->height; y++)
-  {
-    cumulativeSums[0][y] = ImageGetPixel(img, 0, y) + cumulativeSums[0][y - 1];
+  //Initialize the first row of the cumulativeSums matrix
+  for (y = 1; y < img->height; y++){
+    ITERATIONS++;
+    cumulativeSums[0][y] = ImageGetPixel(img, 0, y) + cumulativeSums[0][y-1];
   }
 
   // Calculate the rest of the cumulativeSums matrix
@@ -748,6 +748,7 @@ static unsigned long **calculeCumulativeSums(Image img)
   {
     for (y = 1; y < img->height; y++)
     {
+      ITERATIONS++;
       cumulativeSums[x][y] = ImageGetPixel(img, x, y) + cumulativeSums[x - 1][y] + cumulativeSums[x][y - 1] - cumulativeSums[x - 1][y - 1];
     }
   }
@@ -788,7 +789,7 @@ void ImageBlur(Image img, int dx, int dy)
   //     {
   //       for (j = -dy; j <= dy; j++)
   //       {
-  //         COMPARASIONS++;
+  //         ITERATIONS++;
   //         if (ImageValidPos(img, x + i, y + j))
   //         {
   //           sum += ImageGetPixel(img, x + i, y + j) + 0.5;
@@ -824,30 +825,24 @@ void ImageBlur(Image img, int dx, int dy)
   {
     for (y = 0; y < img->height; y++)
     {
-      // Calculate the rectangle coordinates
+      ITERATIONS++;
+      //Calculate the rectangle coordinates
       x1 = x - dx; // x1 is the left side of the rectangle
       x2 = x + dx; // x2 is the right side of the rectangle
       y1 = y - dy; // y1 is the top side of the rectangle
       y2 = y + dy; // y2 is the bottom side of the rectangle
 
       // Check if the rectangle is inside the image, if not set the rectangle to the image limits
-      if (x1 < 0)
-        x1 = 0;
-      if (x2 >= img->width)
-        x2 = img->width - 1;
-      if (y1 < 0)
-        y1 = 0;
-      if (y2 >= img->height)
-        y2 = img->height - 1;
+      if (x1 < 0) x1 = 0;
+      if (x2 >= img->width) x2 = img->width - 1;
+      if (y1 < 0) y1 = 0;
+      if (y2 >= img->height) y2 = img->height - 1;
 
-      // Calculate the sum of the pixels in the rectangle
-      sum = cumulativeSums[x2][y2];
-      if (x1 > 0)
-        sum -= cumulativeSums[x1 - 1][y2];
-      if (y1 > 0)
-        sum -= cumulativeSums[x2][y1 - 1];
-      if (x1 > 0 && y1 > 0)
-        sum += cumulativeSums[x1 - 1][y1 - 1];
+      //Calculate the sum of the pixels in the rectangle
+      sum = cumulativeSums[x2][y2]; 
+      if (x1 > 0) sum -= cumulativeSums[x1 - 1][y2];
+      if (y1 > 0) sum -= cumulativeSums[x2][y1 - 1];
+      if (x1 > 0 && y1 > 0) sum += cumulativeSums[x1 - 1][y1 - 1];
 
       // Calculate the mean of the pixels in the rectangle
       window = (x2 - x1 + 1) * (y2 - y1 + 1);
@@ -857,9 +852,9 @@ void ImageBlur(Image img, int dx, int dy)
       ImageSetPixel(img, x, y, (uint8)mean);
     }
   }
-  // Deallocate the cumulativeSums matrix
-  for (x = 0; x < img->width; x++)
-  {
+  //Deallocate the cumulativeSums matrix
+  for (x = 0; x < img->width; x++){
+    ITERATIONS++;
     free(cumulativeSums[x]);
   }
   free(cumulativeSums);
