@@ -332,18 +332,6 @@ void ImageStats(Image img, uint8 *min, uint8 *max)
   uint8 pixel;
   *min = *max = ImageGetPixel(img, 0, 0); // Initialize min and max with first pixel
 
-  // for (int x = 1; x < img->width; x++)
-  // {
-  //   for (int y = 0; y < img->height; y++)
-  //   {
-  //     pixel = ImageGetPixel(img, x, y);
-  //     if (pixel < *min)
-  //       *min = pixel;
-  //     if (pixel > *max)
-  //       *max = pixel;
-  //   }
-  // }
-
   for (size_t i = 0; i < img->width * img->height; i++)
   {
     pixel = img->pixel[i];
@@ -426,21 +414,9 @@ void ImageNegative(Image img)
 { ///
   assert(img != NULL);
   // Insert your code here!
-  // uint8 newLevel; // Initialize newLevel for the pixel
-
-  // for (int x = 0; x < img->width; x++)
-  // {
-  //   for (int y = 0; y < img->height; y++)
-  //   {
-  //     // ImageGetPixel(img, x, y) returns the current level of the pixel
-  //     newLevel = 255 - ImageGetPixel(img, x, y); // To transform to negative, we subtract the current level from 255 (Eg.Past=15 New=255-15=240; Past=240 New=255-240=15)
-  //     ImageSetPixel(img, x, y, newLevel);
-  //   }
-  // }
-
   for (size_t i = 0; i < img->width * img->height; i++)
   {
-    img->pixel[i] = 255 - img->pixel[i];
+    img->pixel[i] = 255 - img->pixel[i]; // To transform to negative, we subtract the current level from 255 (Eg.Past=15 New=255-15=240; Past=240 New=255-240=15)
   }
 }
 
@@ -453,20 +429,6 @@ void ImageThreshold(Image img, uint8 thr)
   // Insert your code here!
   uint8 black = 0;
   uint8 white = img->maxval;
-  // uint8 pixelLevel;
-
-  // for (int x = 0; x < img->width; x++)
-  // {
-  //   for (int y = 0; y < img->height; y++)
-  //   {
-  //     pixelLevel = ImageGetPixel(img, x, y);
-
-  //     if (pixelLevel < thr)
-  //       ImageSetPixel(img, x, y, black);
-  //     else
-  //       ImageSetPixel(img, x, y, white);
-  //   }
-  // }
 
   for (size_t i = 0; i < img->width * img->height; i++)
   {
@@ -493,25 +455,12 @@ void ImageBrighten(Image img, double factor)
   // uint8 currentLevel;
   double newLevel;
 
-  // for (int x = 0; x < img->width; x++)
-  // {
-  //   for (int y = 0; y < img->height; y++)
-  //   {
-  //     currentLevel = ImageGetPixel(img, x, y); // Get current level of the pixel
-  //     newLevel = currentLevel * factor + 0.5;  // Multiply current level by factor  (+0.5 so it rounds up)
-
-  //     if (newLevel > img->maxval) // If new level is greater than maxval, set the new level to maxval
-  //       newLevel = img->maxval;
-
-  //     ImageSetPixel(img, x, y, (uint8)newLevel);
-  //   }
-  // }
-
   for (size_t i = 0; i < img->width * img->height; i++)
   {
-    newLevel = img->pixel[i] * factor + 0.5;
+    newLevel = img->pixel[i] * factor + 0.5; // Multiply current level by factor  (+0.5 so it rounds up)
 
-    if (newLevel > img->maxval)
+
+    if (newLevel > img->maxval) //If new level is greater than maxval, set the new level to maxval
     {
       newLevel = img->maxval;
     }
@@ -556,22 +505,10 @@ Image ImageRotate(Image img)
   }
 
   int rotatedX, rotatedY;
-  // int maxY = img->width - 1; // Max Y coordinate
 
   int maxY = img->width - 1; // Max Y coordinate
 
   // Rotate Loop
-  // for (int y = 0; y < img->height; y++)
-  // {
-  //   for (int x = 0; x < img->width; x++)
-  //   {
-  //     rotatedX = y; // The new X coordinate is the current Y coordinate
-  //     rotatedY = maxY - x;
-  //     // ImageGetPixel(img, x, y) returns the level of the pixel in the original position
-  //     ImageSetPixel(rotatedImg, rotatedX, rotatedY, ImageGetPixel(img, x, y)); // Set the level of the original pixel to the rotated position
-  //   }
-  // }
-
   for (int y = 0; y < img->height; y++)
   {
     for (int x = 0; x < img->width; x++)
