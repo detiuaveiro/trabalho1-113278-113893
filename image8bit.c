@@ -332,7 +332,7 @@ void ImageStats(Image img, uint8 *min, uint8 *max)
   uint8 pixel;
   *min = *max = ImageGetPixel(img, 0, 0); // Initialize min and max with first pixel
 
-  for (size_t i = 0; i < img->width * img->height; i++)
+  for (size_t i = 0; i < img->width * img->height; i++) // we multiply the width with the height to have all the indices of the pixel array
   {
     pixel = img->pixel[i];
     if (pixel < *min)
@@ -414,7 +414,7 @@ void ImageNegative(Image img)
 { ///
   assert(img != NULL);
   // Insert your code here!
-  for (size_t i = 0; i < img->width * img->height; i++)
+  for (size_t i = 0; i < img->width * img->height; i++) // we multiply the width with the height to have all the indices of the pixel array
   {
     img->pixel[i] = 255 - img->pixel[i]; // To transform to negative, we subtract the current level from 255 (Eg.Past=15 New=255-15=240; Past=240 New=255-240=15)
   }
@@ -430,7 +430,7 @@ void ImageThreshold(Image img, uint8 thr)
   uint8 black = 0;
   uint8 white = img->maxval;
 
-  for (size_t i = 0; i < img->width * img->height; i++)
+  for (size_t i = 0; i < img->width * img->height; i++) // we multiply the width with the height to have all the indices of the pixel array
   {
     if (img->pixel[i] < thr)
     {
@@ -452,15 +452,13 @@ void ImageBrighten(Image img, double factor)
   assert(img != NULL);
   assert(factor >= 0.0);
   // Insert your code here!
-  // uint8 currentLevel;
   double newLevel;
 
-  for (size_t i = 0; i < img->width * img->height; i++)
+  for (size_t i = 0; i < img->width * img->height; i++) // we multiply the width with the height to have all the indices of the pixel array
   {
     newLevel = img->pixel[i] * factor + 0.5; // Multiply current level by factor  (+0.5 so it rounds up)
 
-
-    if (newLevel > img->maxval) //If new level is greater than maxval, set the new level to maxval
+    if (newLevel > img->maxval) // If new level is greater than maxval, set the new level to maxval
     {
       newLevel = img->maxval;
     }
@@ -702,10 +700,10 @@ int ImageLocateSubImage(Image img1, int *px, int *py, Image img2)
 }
 
 /// Filtering
-static unsigned long** calculeCumulativeSums(Image img)
+static unsigned long **calculeCumulativeSums(Image img)
 {
-  //Allocate the cumulativeSums matrix (width x height) but first allocate the width
-  unsigned long **cumulativeSums = (unsigned long**)malloc(img->width * sizeof(unsigned long *));
+  // Allocate the cumulativeSums matrix (width x height) but first allocate the width
+  unsigned long **cumulativeSums = (unsigned long **)malloc(img->width * sizeof(unsigned long *));
   if (cumulativeSums == NULL)
   {
     errsave = errno;
@@ -714,35 +712,38 @@ static unsigned long** calculeCumulativeSums(Image img)
   }
 
   int x, y;
-  //Allocate the height of the cumulativeSums matrix for each width index
+  // Allocate the height of the cumulativeSums matrix for each width index
   for (x = 0; x < img->width; x++)
   {
-    cumulativeSums[x] = (unsigned long*)malloc(img->height * sizeof(unsigned long));
+    cumulativeSums[x] = (unsigned long *)malloc(img->height * sizeof(unsigned long));
     if (cumulativeSums[x] == NULL)
     {
       errsave = errno;
       errno = errsave;
-      for (int j = 0; j <= x; j++){
+      for (int j = 0; j <= x; j++)
+      {
         free(cumulativeSums[j]);
       }
       free(cumulativeSums);
       return NULL;
     }
   }
-  //Initialize the first value of the cumulativeSums matrix (0,0)
+  // Initialize the first value of the cumulativeSums matrix (0,0)
   cumulativeSums[0][0] = ImageGetPixel(img, 0, 0);
 
-  //Initialize the first column of the cumulativeSums matrix
-  for (x = 1; x < img->width; x++){
-    cumulativeSums[x][0] = ImageGetPixel(img, x, 0) + cumulativeSums[x-1][0];
+  // Initialize the first column of the cumulativeSums matrix
+  for (x = 1; x < img->width; x++)
+  {
+    cumulativeSums[x][0] = ImageGetPixel(img, x, 0) + cumulativeSums[x - 1][0];
   }
 
-  //Initialize the first row of the cumulativeSums matrix
-  for (y = 1; y < img->height; y++){
-    cumulativeSums[0][y] = ImageGetPixel(img, 0, y) + cumulativeSums[0][y-1];
+  // Initialize the first row of the cumulativeSums matrix
+  for (y = 1; y < img->height; y++)
+  {
+    cumulativeSums[0][y] = ImageGetPixel(img, 0, y) + cumulativeSums[0][y - 1];
   }
 
-  //Calculate the rest of the cumulativeSums matrix
+  // Calculate the rest of the cumulativeSums matrix
   for (x = 1; x < img->width; x++)
   {
     for (y = 1; y < img->height; y++)
@@ -763,14 +764,14 @@ void ImageBlur(Image img, int dx, int dy)
   assert(dx >= 0);
   assert(dy >= 0);
 
-  //1º way - O(width*height*(2dx+1)*(2dy+1)) time complexity
-  // Image blurredImg = ImageCreate(img->width, img->height, img->maxval);
-  // if (blurredImg == NULL)
-  // {
-  //   errsave = errno;
-  //   errno = errsave;
-  //   return;
-  // }
+  // 1º way - O(width*height*(2dx+1)*(2dy+1)) time complexity
+  //  Image blurredImg = ImageCreate(img->width, img->height, img->maxval);
+  //  if (blurredImg == NULL)
+  //  {
+  //    errsave = errno;
+  //    errno = errsave;
+  //    return;
+  //  }
 
   // double sum, mean;
   // int count, x, y, i, j;
@@ -808,14 +809,14 @@ void ImageBlur(Image img, int dx, int dy)
   // free(blurredImg);
 
   // 2º way - O(width*height) time complexity
-  //Aproach Idea: 1 - Calculate the array of the cumulative sums of the pixels
+  // Aproach Idea: 1 - Calculate the array of the cumulative sums of the pixels
   //              2 - Using this array, now we can calculate the mean of the pixels in the rectangle [x-dx, x+dx]x[y-dy, y+dy] in O(1) time complexity
   //              3 - Because calculating the mean of the pixels is O(1) time complexity, for all the pixels of the image it is only O(width*height) time complexity
-  
-  //Calculate the array of the cumulative sums of the pixels
+
+  // Calculate the array of the cumulative sums of the pixels
   unsigned long **cumulativeSums = calculeCumulativeSums(img);
 
-  //Calculate the mean of the pixels in the rectangle [x-dx, x+dx]x[y-dy, y+dy]
+  // Calculate the mean of the pixels in the rectangle [x-dx, x+dx]x[y-dy, y+dy]
   double sum, mean;
   int window, x, y, x1, x2, y1, y2;
 
@@ -823,36 +824,43 @@ void ImageBlur(Image img, int dx, int dy)
   {
     for (y = 0; y < img->height; y++)
     {
-      //Calculate the rectangle coordinates
+      // Calculate the rectangle coordinates
       x1 = x - dx; // x1 is the left side of the rectangle
       x2 = x + dx; // x2 is the right side of the rectangle
       y1 = y - dy; // y1 is the top side of the rectangle
       y2 = y + dy; // y2 is the bottom side of the rectangle
 
-      //Check if the rectangle is inside the image, if not set the rectangle to the image limits
-      if (x1 < 0) x1 = 0;
-      if (x2 >= img->width) x2 = img->width - 1;
-      if (y1 < 0) y1 = 0;
-      if (y2 >= img->height) y2 = img->height - 1;
+      // Check if the rectangle is inside the image, if not set the rectangle to the image limits
+      if (x1 < 0)
+        x1 = 0;
+      if (x2 >= img->width)
+        x2 = img->width - 1;
+      if (y1 < 0)
+        y1 = 0;
+      if (y2 >= img->height)
+        y2 = img->height - 1;
 
-      //Calculate the sum of the pixels in the rectangle
+      // Calculate the sum of the pixels in the rectangle
       sum = cumulativeSums[x2][y2];
-      if (x1 > 0) sum -= cumulativeSums[x1 - 1][y2];
-      if (y1 > 0) sum -= cumulativeSums[x2][y1 - 1];
-      if (x1 > 0 && y1 > 0) sum += cumulativeSums[x1 - 1][y1 - 1];
+      if (x1 > 0)
+        sum -= cumulativeSums[x1 - 1][y2];
+      if (y1 > 0)
+        sum -= cumulativeSums[x2][y1 - 1];
+      if (x1 > 0 && y1 > 0)
+        sum += cumulativeSums[x1 - 1][y1 - 1];
 
-      //Calculate the mean of the pixels in the rectangle
+      // Calculate the mean of the pixels in the rectangle
       window = (x2 - x1 + 1) * (y2 - y1 + 1);
-      mean = sum/window + 0.5;  // +0.5 so it rounds up
+      mean = sum / window + 0.5; // +0.5 so it rounds up
 
-      //Set the pixel to the mean
+      // Set the pixel to the mean
       ImageSetPixel(img, x, y, (uint8)mean);
     }
   }
-  //Deallocate the cumulativeSums matrix
-  for (x = 0; x < img->width; x++){
+  // Deallocate the cumulativeSums matrix
+  for (x = 0; x < img->width; x++)
+  {
     free(cumulativeSums[x]);
   }
   free(cumulativeSums);
-
 }
