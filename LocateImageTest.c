@@ -100,7 +100,7 @@ void LocateImageBestCase(int argc, char *argv[])
 
 
 
-void LocateImageMediumCase(int argc, char *argv[])
+void LocateImageAverageCase(int argc, char *argv[])
 {
     if (argc != 5)
     {
@@ -109,7 +109,7 @@ void LocateImageMediumCase(int argc, char *argv[])
     }
 
     ImageInit();
-    printf("--------------------LocateImage Medium Case--------------------\n");
+    printf("--------------------LocateImage Average Case--------------------\n");
 
     Image small = ImageLoad(argv[1]);
     if (small == NULL)
@@ -287,7 +287,7 @@ void LocateImageWorstCase(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     LocateImageBestCase(argc, argv);
-    LocateImageMediumCase(argc, argv);
+    LocateImageAverageCase(argc, argv);
     LocateImageWorstCase(argc, argv);
 
     return 0;

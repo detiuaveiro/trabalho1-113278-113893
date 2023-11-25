@@ -15,7 +15,7 @@ void BlurTestBestCase(int argc, char* argv[]){
     }
 
     ImageInit();
-    printf("--------------------Blur Best Case--------------------\n");
+    printf("------------------------Blur Best Case-------------------------\n");
 
     Image small = ImageLoad(argv[1]);
     if (small == NULL){
@@ -38,23 +38,23 @@ void BlurTestBestCase(int argc, char* argv[]){
 
     //Test the blur in the small image in window (1,1)
     InstrReset();
-    printf("Blur Small image: \n");
+    printf("Blur Small Image (%dx%d): \n", ImageWidth(small), ImageHeight(small));
     ImageBlur(small, dx, dy);
     InstrPrint();
 
     //Test the blur in the medium image in window (1,1)
     InstrReset();
-    printf("Blur Medium image: \n");
+    printf("Blur Medium Image (%dx%d): \n", ImageWidth(medium), ImageHeight(medium));
     ImageBlur(medium, dx, dy);
     InstrPrint();
 
     //Test the blur in the big image in window (1,1)
     InstrReset();
-    printf("Blur Big image: \n");
+    printf("Blur Big Image (%dx%d): \n", ImageWidth(big), ImageHeight(big));
     ImageBlur(big, dx, dy);
     InstrPrint();
     
-    printf("-----------------------------------------------------\n");
+    printf("---------------------------------------------------------------\n");
 
     ImageDestroy(&small);
     ImageDestroy(&medium);
@@ -68,7 +68,7 @@ void BlurTestWorstCase(int argc, char* argv[]){
     }
 
     ImageInit();
-    printf("--------------------Blur Worst Case--------------------\n");
+    printf("------------------------Blur Worst Case------------------------\n");
 
     Image small = ImageLoad(argv[1]);
     if (small == NULL){
@@ -89,7 +89,7 @@ void BlurTestWorstCase(int argc, char* argv[]){
     int dx = (ImageWidth(small) - 1) / 2;
     int dy = (ImageHeight(small) - 1) / 2;
     InstrReset();
-    printf("Blur Small image: \n");
+    printf("Blur Small Image (%dx%d): \n", ImageWidth(small), ImageHeight(small));
     ImageBlur(small, dx, dy);
     InstrPrint();
 
@@ -97,7 +97,7 @@ void BlurTestWorstCase(int argc, char* argv[]){
     dx = (ImageWidth(medium) - 1) / 2;
     dy = (ImageHeight(medium) - 1) / 2;
     InstrReset();
-    printf("Blur Medium image: \n");
+    printf("Blur Medium Image (%dx%d): \n", ImageWidth(medium), ImageHeight(medium));
     ImageBlur(medium, dx, dy);
     InstrPrint();
 
@@ -105,25 +105,25 @@ void BlurTestWorstCase(int argc, char* argv[]){
     dx = (ImageWidth(big) - 1) / 2;
     dy = (ImageHeight(big) - 1) / 2;
     InstrReset();
-    printf("Blur Big image: \n");
+    printf("Blur Big Image (%dx%d): \n", ImageWidth(big), ImageHeight(big));
     ImageBlur(big, dx, dy);
     InstrPrint();
 
-    printf("-----------------------------------------------------\n");
+    printf("---------------------------------------------------------------\n");
 
     ImageDestroy(&small);
     ImageDestroy(&medium);
     ImageDestroy(&big);
 }
 
-void BlurTestCase(int argc, char* argv[]){
+void BlurTestAverageCase(int argc, char* argv[]){
     if (argc != 4){
         printf("Usage: %s <small image> <medium image> <big image>\n", argv[0]);
         exit(1);
     }
 
     ImageInit();
-    printf("--------------------Blur Medium Case--------------------\n");
+    printf("-----------------------Blur Average Case-----------------------\n");
 
     Image small = ImageLoad(argv[1]);
     if (small == NULL){
@@ -144,7 +144,7 @@ void BlurTestCase(int argc, char* argv[]){
     int dx = (ImageWidth(small)/2 - 1) / 2;
     int dy = (ImageHeight(small)/2 - 1) / 2;
     InstrReset();
-    printf("Blur Small image: \n");
+    printf("Blur Small Image (%dx%d): \n", ImageWidth(small), ImageHeight(small));
     ImageBlur(small, dx, dy);
     InstrPrint();
 
@@ -152,7 +152,7 @@ void BlurTestCase(int argc, char* argv[]){
     dx = (ImageWidth(medium)/2 - 1) / 2;
     dy = (ImageHeight(medium)/2 - 1) / 2;
     InstrReset();
-    printf("Blur Medium image: \n");
+    printf("Blur Medium Image (%dx%d): \n", ImageWidth(medium), ImageHeight(medium));
     ImageBlur(medium, dx, dy);
     InstrPrint();
 
@@ -160,11 +160,11 @@ void BlurTestCase(int argc, char* argv[]){
     dx = (ImageWidth(big)/2 - 1) / 2;
     dy = (ImageHeight(big)/2 - 1) / 2;
     InstrReset();
-    printf("Blur Big image: \n");
+    printf("Blur Big Image (%dx%d): \n", ImageWidth(big), ImageHeight(big));
     ImageBlur(big, dx, dy);
     InstrPrint();
 
-    printf("-----------------------------------------------------\n");
+    printf("---------------------------------------------------------------\n");
 
     ImageDestroy(&small);
     ImageDestroy(&medium);
@@ -173,7 +173,7 @@ void BlurTestCase(int argc, char* argv[]){
 
 int main(int argc, char* argv[]){
     BlurTestBestCase(argc, argv);
-    BlurTestCase(argc, argv);
+    BlurTestAverageCase(argc, argv);
     BlurTestWorstCase(argc, argv);
     return 0;
 }
