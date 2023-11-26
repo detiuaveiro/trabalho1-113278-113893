@@ -16,7 +16,7 @@ void LocateImageBestCase(int argc, char *argv[])
     }
 
     ImageInit();
-    printf("--------------------LocateImage Best Case--------------------\n");
+    printf("---------------------LocateImage Best Case---------------------\n");
 
     Image small = ImageLoad(argv[1]);
     if (small == NULL)
@@ -50,10 +50,10 @@ void LocateImageBestCase(int argc, char *argv[])
 
     int px, py;
 
-    // Test if the smaller image is in the big image
+    // Test if the smaller image is in the small image
     InstrReset();
-    printf("Big image: \n");
-    if (ImageLocateSubImage(big, &px, &py, smaller))
+    printf("Small image: \n");
+    if (ImageLocateSubImage(small, &px, &py, smaller))
     {
         printf("Image found at (%d, %d)\n", px, py);
     }
@@ -61,7 +61,6 @@ void LocateImageBestCase(int argc, char *argv[])
     {
         printf("Image not found\n");
     }
-
     InstrPrint();
 
     // Test if the smaller image is in the medium image
@@ -78,10 +77,10 @@ void LocateImageBestCase(int argc, char *argv[])
 
     InstrPrint();
 
-    // Test if the smaller image is in the small image
+    // Test if the smaller image is in the big image
     InstrReset();
-    printf("Small image: \n");
-    if (ImageLocateSubImage(small, &px, &py, smaller))
+    printf("Big image: \n");
+    if (ImageLocateSubImage(big, &px, &py, smaller))
     {
         printf("Image found at (%d, %d)\n", px, py);
     }
@@ -89,8 +88,10 @@ void LocateImageBestCase(int argc, char *argv[])
     {
         printf("Image not found\n");
     }
+
     InstrPrint();
-    printf("-------------------------------------------------------------\n");
+    
+    printf("---------------------------------------------------------------\n");
 
     ImageDestroy(&small);
     ImageDestroy(&medium);
@@ -109,7 +110,7 @@ void LocateImageAverageCase(int argc, char *argv[])
     }
 
     ImageInit();
-    printf("--------------------LocateImage Average Case--------------------\n");
+    printf("-------------------LocateImage Average Case--------------------\n");
 
     Image small = ImageLoad(argv[1]);
     if (small == NULL)
@@ -143,10 +144,10 @@ void LocateImageAverageCase(int argc, char *argv[])
 
     int px, py;
 
-    // Test if the smaller image is in the big image
+    // Test if the smaller image is in the small image
     InstrReset();
-    printf("Big image: \n");
-    if (ImageLocateSubImage(big, &px, &py, smaller))
+    printf("Small image: \n");
+    if (ImageLocateSubImage(small, &px, &py, smaller))
     {
         printf("Image found at (%d, %d)\n", px, py);
     }
@@ -154,7 +155,6 @@ void LocateImageAverageCase(int argc, char *argv[])
     {
         printf("Image not found\n");
     }
-
     InstrPrint();
 
     // Test if the smaller image is in the medium image
@@ -171,10 +171,10 @@ void LocateImageAverageCase(int argc, char *argv[])
 
     InstrPrint();
 
-    // Test if the smaller image is in the small image
+    // Test if the smaller image is in the big image
     InstrReset();
-    printf("Small image: \n");
-    if (ImageLocateSubImage(small, &px, &py, smaller))
+    printf("Big image: \n");
+    if (ImageLocateSubImage(big, &px, &py, smaller))
     {
         printf("Image found at (%d, %d)\n", px, py);
     }
@@ -182,8 +182,10 @@ void LocateImageAverageCase(int argc, char *argv[])
     {
         printf("Image not found\n");
     }
+
     InstrPrint();
-    printf("-------------------------------------------------------------\n");
+    
+    printf("---------------------------------------------------------------\n");
 
     ImageDestroy(&small);
     ImageDestroy(&medium);
@@ -202,7 +204,7 @@ void LocateImageWorstCase(int argc, char *argv[])
     }
 
     ImageInit();
-    printf("--------------------LocateImage Worst Case--------------------\n");
+    printf("--------------------LocateImage Worst Case---------------------\n");
 
     Image small = ImageLoad(argv[1]);
     if (small == NULL)
@@ -236,10 +238,11 @@ void LocateImageWorstCase(int argc, char *argv[])
 
     int px, py;
 
-    // Test if the smaller image is in the big image
+    
+    // Test if the smaller image is in the small image
     InstrReset();
-    printf("Big image: \n");
-    if (ImageLocateSubImage(big, &px, &py, smaller))
+    printf("Small image: \n");
+    if (ImageLocateSubImage(small, &px, &py, smaller))
     {
         printf("Image found at (%d, %d)\n", px, py);
     }
@@ -247,7 +250,6 @@ void LocateImageWorstCase(int argc, char *argv[])
     {
         printf("Image not found\n");
     }
-
     InstrPrint();
 
     // Test if the smaller image is in the medium image
@@ -264,10 +266,10 @@ void LocateImageWorstCase(int argc, char *argv[])
 
     InstrPrint();
 
-    // Test if the smaller image is in the small image
+    // Test if the smaller image is in the big image
     InstrReset();
-    printf("Small image: \n");
-    if (ImageLocateSubImage(small, &px, &py, smaller))
+    printf("Big image: \n");
+    if (ImageLocateSubImage(big, &px, &py, smaller))
     {
         printf("Image found at (%d, %d)\n", px, py);
     }
@@ -275,8 +277,10 @@ void LocateImageWorstCase(int argc, char *argv[])
     {
         printf("Image not found\n");
     }
+
     InstrPrint();
-    printf("-------------------------------------------------------------\n");
+    
+    printf("---------------------------------------------------------------\n");
 
     ImageDestroy(&small);
     ImageDestroy(&medium);
@@ -286,9 +290,54 @@ void LocateImageWorstCase(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
+    printf("-------------------SubImage Size (222x217)---------------------\n");
     LocateImageBestCase(argc, argv);
     LocateImageAverageCase(argc, argv);
     LocateImageWorstCase(argc, argv);
 
+    printf("------------------Test Worstest Case (256x256)-----------------\n");
+    Image testBlack = ImageCreate(256, 256, 255);
+    ImageSetPixel(testBlack, 255, 255, 255);
+    Image subTestBlackSmall = ImageCreate(50, 50, 255);
+    ImageSetPixel(subTestBlackSmall, 49, 49, 255);
+    Image subTestBlackOne = ImageCreate(1,1, 255);
+    ImageSetPixel(subTestBlackOne, 0, 0, 255);
+    Image subTestBlackMedium = ImageCreate(128, 128, 255);
+    ImageSetPixel(subTestBlackMedium, 127, 127, 255);
+    Image subTestBlackMediumPlus = ImageCreate(206, 206, 255);
+    ImageSetPixel(subTestBlackMediumPlus, 205, 205, 255);
+    
+    int px, py;
+
+    InstrReset();
+    printf("Image (1x1): \n");
+    ImageLocateSubImage(testBlack, &px, &py, subTestBlackOne);
+    InstrPrint();
+
+    InstrReset();
+    printf("Image (50x50): \n");
+    ImageLocateSubImage(testBlack, &px, &py, subTestBlackSmall);
+    InstrPrint();
+
+    InstrReset();
+    printf("Image (128x128): \n");
+    ImageLocateSubImage(testBlack, &px, &py, subTestBlackMedium);
+    InstrPrint();
+
+    InstrReset();
+    printf("Image (206x206): \n");
+    ImageLocateSubImage(testBlack, &px, &py, subTestBlackMediumPlus);
+    InstrPrint();
+
+    InstrReset();
+    printf("Image (256x256): \n");
+    ImageLocateSubImage(testBlack, &px, &py, testBlack);
+    InstrPrint();
+
+    printf("---------------------------------------------------------------\n");
+
+    ImageDestroy(&testBlack);
+    ImageDestroy(&subTestBlackSmall);
+    ImageDestroy(&subTestBlackMedium);
     return 0;
 }

@@ -193,6 +193,11 @@ Image ImageCreate(int width, int height, uint8 maxval)
     free(img);
     return NULL;
   }
+
+  for (int i = 0; i < width*height; i++){
+    img->pixel[i] = 0;
+  }
+
   return img;
 }
 
@@ -769,48 +774,48 @@ void ImageBlur(Image img, int dx, int dy)
   assert(2*dy+1 <= img->height); 
 
   // 1º way - O(width*height*(2dx+1)*(2dy+1)) time complexity
-   Image blurredImg = ImageCreate(img->width, img->height, img->maxval);
-   if (blurredImg == NULL)
-   {
-     errsave = errno;
-     errno = errsave;
-     return;
-   }
+  //  Image blurredImg = ImageCreate(img->width, img->height, img->maxval);
+  //  if (blurredImg == NULL)
+  //  {
+  //    errsave = errno;
+  //    errno = errsave;
+  //    return;
+  //  }
 
-  double sum, mean;
-  int count, x, y, i, j;
+  // double sum, mean;
+  // int count, x, y, i, j;
 
-  for (x = 0; x < img->width; x++)
-  {
-    for (y = 0; y < img->height; y++)
-    {
-      //For every pixel we calculate its mean
-      sum = 0;
-      count = 0;
+  // for (x = 0; x < img->width; x++)
+  // {
+  //   for (y = 0; y < img->height; y++)
+  //   {
+  //     //For every pixel we calculate its mean
+  //     sum = 0;
+  //     count = 0;
 
-      for (i = -dx; i <= dx; i++)
-      {
-        for (j = -dy; j <= dy; j++)
-        {
-          ITERATIONS++;
-          if (ImageValidPos(img, x + i, y + j))
-          {
-            sum += ImageGetPixel(img, x + i, y + j) + 0.5;
-            count++;
-          }
-        }
-      }
+  //     for (i = -dx; i <= dx; i++)
+  //     {
+  //       for (j = -dy; j <= dy; j++)
+  //       {
+  //         ITERATIONS++;
+  //         if (ImageValidPos(img, x + i, y + j))
+  //         {
+  //           sum += ImageGetPixel(img, x + i, y + j) + 0.5;
+  //           count++;
+  //         }
+  //       }
+  //     }
 
-      mean = sum / count;
-      ImageSetPixel(blurredImg, x, y, (uint8)mean);
-    }
-  }
-  //Copy the blurred image back to the original image
-  free(img->pixel);               // Free the original image pixel array
-  img->pixel = blurredImg->pixel; // Point the original image pixel array to the blurred image pixel array
+  //     mean = sum / count;
+  //     ImageSetPixel(blurredImg, x, y, (uint8)mean);
+  //   }
+  // }
+  // //Copy the blurred image back to the original image
+  // free(img->pixel);               // Free the original image pixel array
+  // img->pixel = blurredImg->pixel; // Point the original image pixel array to the blurred image pixel array
 
-  // free the temporary blurred image, not necessary to free the pixel array because it is already atributed to the original image
-  free(blurredImg);
+  // // free the temporary blurred image, not necessary to free the pixel array because it is already atributed to the original image
+  // free(blurredImg);
 
   // 2º way - O(width*height) time complexity
   // Aproach Idea: 1 - Calculate the array of the cumulative sums of the pixels
@@ -818,47 +823,47 @@ void ImageBlur(Image img, int dx, int dy)
   //              3 - Because calculating the mean of the pixels is O(1) time complexity, for all the pixels of the image it is only O(width*height) time complexity
 
   // Calculate the array of the cumulative sums of the pixels
-  // unsigned long **cumulativeSums = calculeCumulativeSums(img);
+  unsigned long **cumulativeSums = calculeCumulativeSums(img);
 
-  // // Calculate the mean of the pixels in the rectangle [x-dx, x+dx]x[y-dy, y+dy]
-  // double sum, mean;
-  // int window, x, y, x1, x2, y1, y2;
+  // Calculate the mean of the pixels in the rectangle [x-dx, x+dx]x[y-dy, y+dy]
+  double sum, mean;
+  int window, x, y, x1, x2, y1, y2;
 
-  // for (x = 0; x < img->width; x++)
-  // {
-  //   for (y = 0; y < img->height; y++)
-  //   {
-  //     ITERATIONS++;
-  //     //Calculate the rectangle coordinates
-  //     x1 = x - dx; // x1 is the left side of the rectangle
-  //     x2 = x + dx; // x2 is the right side of the rectangle
-  //     y1 = y - dy; // y1 is the top side of the rectangle
-  //     y2 = y + dy; // y2 is the bottom side of the rectangle
+  for (x = 0; x < img->width; x++)
+  {
+    for (y = 0; y < img->height; y++)
+    {
+      ITERATIONS++;
+      //Calculate the rectangle coordinates
+      x1 = x - dx; // x1 is the left side of the rectangle
+      x2 = x + dx; // x2 is the right side of the rectangle
+      y1 = y - dy; // y1 is the top side of the rectangle
+      y2 = y + dy; // y2 is the bottom side of the rectangle
 
-  //     // Check if the rectangle is inside the image, if not set the rectangle to the image limits
-  //     if (x1 < 0) x1 = 0;
-  //     if (x2 >= img->width) x2 = img->width - 1;
-  //     if (y1 < 0) y1 = 0;
-  //     if (y2 >= img->height) y2 = img->height - 1;
+      // Check if the rectangle is inside the image, if not set the rectangle to the image limits
+      if (x1 < 0) x1 = 0;
+      if (x2 >= img->width) x2 = img->width - 1;
+      if (y1 < 0) y1 = 0;
+      if (y2 >= img->height) y2 = img->height - 1;
 
-  //     //Calculate the sum of the pixels in the rectangle
-  //     sum = cumulativeSums[x2][y2]; 
-  //     if (x1 > 0) sum -= cumulativeSums[x1 - 1][y2];
-  //     if (y1 > 0) sum -= cumulativeSums[x2][y1 - 1];
-  //     if (x1 > 0 && y1 > 0) sum += cumulativeSums[x1 - 1][y1 - 1];
+      //Calculate the sum of the pixels in the rectangle
+      sum = cumulativeSums[x2][y2]; 
+      if (x1 > 0) sum -= cumulativeSums[x1 - 1][y2];
+      if (y1 > 0) sum -= cumulativeSums[x2][y1 - 1];
+      if (x1 > 0 && y1 > 0) sum += cumulativeSums[x1 - 1][y1 - 1];
 
-  //     // Calculate the mean of the pixels in the rectangle
-  //     window = (x2 - x1 + 1) * (y2 - y1 + 1);
-  //     mean = sum / window + 0.5; // +0.5 so it rounds up
+      // Calculate the mean of the pixels in the rectangle
+      window = (x2 - x1 + 1) * (y2 - y1 + 1);
+      mean = sum / window + 0.5; // +0.5 so it rounds up
 
-  //     // Set the pixel to the mean
-  //     ImageSetPixel(img, x, y, (uint8)mean);
-  //   }
-  // }
-  // //Deallocate the cumulativeSums matrix
-  // for (x = 0; x < img->width; x++){
-  //   ITERATIONS++;
-  //   free(cumulativeSums[x]);
-  // }
-  // free(cumulativeSums);
+      // Set the pixel to the mean
+      ImageSetPixel(img, x, y, (uint8)mean);
+    }
+  }
+  //Deallocate the cumulativeSums matrix
+  for (x = 0; x < img->width; x++){
+    ITERATIONS++;
+    free(cumulativeSums[x]);
+  }
+  free(cumulativeSums);
 }
