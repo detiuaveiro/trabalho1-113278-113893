@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
     LocateImageAverageCase(argc, argv);
     LocateImageWorstCase(argc, argv);
 
-    printf("------------------Test Worstest Case (256x256)-----------------\n");
+    printf("--------------------The Worst Case (256x256)-------------------\n");
     Image testBlack = ImageCreate(256, 256, 255);
     ImageSetPixel(testBlack, 255, 255, 255);
     Image subTestBlackSmall = ImageCreate(50, 50, 255);
