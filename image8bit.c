@@ -14,7 +14,7 @@
 // NMec:113893 Name: Guilherme Ferreira Santos
 //
 //
-// Date:
+// Date:26/11/2023
 //
 
 #include "image8bit.h"
